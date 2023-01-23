@@ -1,6 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Heroe } from './classes/heroe';
+import { Store } from '@ngrx/store';
+import * as HeroActions from './store/heroes.actions';
+import { getTestBed } from '@angular/core/testing';
 
 @Injectable()
 export class HeroesService {
@@ -20,7 +23,7 @@ export class HeroesService {
   
   public teams = new Map();
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private store: Store) { }
 
   resetPager() {
     this.page = 0;
@@ -48,6 +51,15 @@ export class HeroesService {
             result.resourceURI,
             this.getTeamColor(result.id)
           ));
+      
+          this.store.dispatch(new HeroActions.AddHero({ 
+            id: result.id, 
+            name: result.name, 
+            description: result.description,
+          modified: result.modified, 
+          thumbnail: result.thumbnail, 
+          resourceURI: result.resourceURI, 
+          teamColor: this.getTeamColor(result.id)}) )
         }
       );
     });

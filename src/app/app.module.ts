@@ -11,6 +11,10 @@ import { HttpClientModule } from '@angular/common/http';
 import { HeroesService } from './heroes.service';
 import { CapitalizePipe } from './capitalize.pipe';
 import { SpinnerComponent } from './spinner/spinner.component';
+import { StoreModule } from '@ngrx/store';
+import {  heroReducer } from './store/heroes.reducer';
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { environment } from 'src/environments/environment';
 
 
 
@@ -27,7 +31,12 @@ import { SpinnerComponent } from './spinner/spinner.component';
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
-    FormsModule
+    FormsModule,
+    StoreModule.forRoot({heroes: heroReducer}),
+    StoreDevtoolsModule.instrument({
+      maxAge: 25, // Retains last 25 states
+      logOnly: environment.production,
+    })
   ],
   providers: [HeroesService],
 
