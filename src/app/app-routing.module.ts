@@ -9,7 +9,8 @@ const routes: Routes = [
   {
     path: 'listado-heroes',
     loadChildren: () => import('./listado-de-heroes/listado-de-heroes.module').then(m => m.ListadoDeHeroesModule)
-  }
+  },
+  { path: '**', redirectTo: '/listado-heroes'}
 ];
 
 @NgModule({
