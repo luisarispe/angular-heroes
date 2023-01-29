@@ -1,17 +1,14 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Heroe } from './classes/heroe';
-import { Store } from '@ngrx/store';
-import * as HeroActions from './store/heroes.actions';
-import { getTestBed } from '@angular/core/testing';
+import { AddHeroe, RemoveHeroes } from './store/heroes/heroes.actions';
+import { Store } from '@ngxs/store';
+
 
 @Injectable()
 export class HeroesService {
-
-  private protocol = 'https:';
-  private ApiUrl = '//gateway.marvel.com:443/v1/public/';
   public heroes: Array<Heroe> = [];
-
+  private base_url='http://localhost:3000/api/hero';
   public page = 0;
   public step = 20;
   public total = 0;
@@ -21,8 +18,6 @@ export class HeroesService {
                         "naranjo":"#df5c0f",
                         "verde":"#0ea521"}
   
-  public teams = new Map();
-
   constructor(private http: HttpClient, private store: Store) { }
 
   resetPager() {
@@ -31,52 +26,47 @@ export class HeroesService {
 
   getHeroes (nameStartsWith?: string, page?: number) {
     console.log("TEAMS");
-    console.log(Array.from(this.teams));
     if (page || page === 0) {
       this.page = page;
     }
-    const url = this.protocol + this.ApiUrl + 'characters?apikey=56d2cc44b1c84eb7c6c9673565a9eb4b'
-    + '&offset=' + (this.page * this.step)
-    + (nameStartsWith ? ('&nameStartsWith=' + nameStartsWith) : '');
+
+    const url=this.base_url+'?offset='+(this.page * this.step)+ (nameStartsWith ? ('&nameStartsWith=' + nameStartsWith) : '');
+
     this.http.get<any>(url).subscribe((data) => {
-      this.heroes = [];
-      this.total = Math.ceil(data.data.total / this.step);
-      data.data.results.forEach( result => {
-          this.heroes.push(new Heroe(
-            result.id,
-            result.name,
-            result.description,
-            result.modified,
-            result.thumbnail,
-            result.resourceURI,
-            this.getTeamColor(result.id)
-          ));
+      this.total = Math.ceil(data.total / this.step);
+      this.store.dispatch(new RemoveHeroes());
+      data.heroes.forEach( result => {
       
-          this.store.dispatch(new HeroActions.AddHero({ 
-            id: result.id, 
-            name: result.name, 
-            description: result.description,
-          modified: result.modified, 
-          thumbnail: result.thumbnail, 
-          resourceURI: result.resourceURI, 
-          teamColor: this.getTeamColor(result.id)}) )
+          this.store.dispatch(new AddHeroe({
+            id:result.id,
+            name:result.name,
+            description:result.description,
+            modified:result.modified,
+            thumbnail:result.thumbnail,
+            resourceURI:result.resourceURI,
+            teamColor:result.teamColor
+          }));
         }
       );
     });
   }
 
   getHeroe(id) {
-    const url = this.protocol + this.ApiUrl + 'characters/' + id + '?apikey=56d2cc44b1c84eb7c6c9673565a9eb4b';
+    const url = this.base_url+'/getOne?id=' + id;
     return this.http.get<any>(url);
   }
+  save(id, color){
+    const color_code=this.group_colors[color];
+    
+    let body = new URLSearchParams();
+    body.set('id_hero', id);
+    body.set('color', color);
+    body.set('color_code', color_code);
 
-  getTeamColor(id):string{
-    if(this.teams.get(id)!=undefined){
-      return this.teams.get(id);
-    }
-    else{
-      return "";
-    }
+    let options = {
+      headers: new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded')
+  };
+    return this.http.post(this.base_url,body.toString(), options);
+    
   }
-
 }

@@ -22,25 +22,29 @@ export class HeroProfileComponent implements OnInit {
   ngOnInit() {
     this.route.params.subscribe(params => {
       this.id = params.id;
-      this.heroesService.getHeroe(this.id).subscribe(data => {
-        const temp = data.data.results[0];
-        this.heroe = new Heroe(temp.id, temp.name, temp.description, temp. modified, temp.thumbnail, temp.resourceURI,this.heroesService.getTeamColor(temp.id));
-        console.log("Tiene equipo?");
-        console.log(this.heroe.teamColor);
-        this.team = this.heroe.teamColor;
-      });
+      this.getOne();
     });
     
   }
-
+  getOne(){
+    this.heroesService.getHeroe(this.id).subscribe(data => {
+      const temp = data;
+      this.heroe = new Heroe(temp.id, temp.name, temp.description, temp. modified, temp.thumbnail, temp.resourceURI,temp.teamColor);
+      if(this.heroe.teamColor) this.team=this.heroe.teamColor.color;
+      console.log("Tiene equipo?");
+    });
+  }
   goBack() {
     this._location.back();
   }
 
-  getTeam(team):void{
-    console.log("Color: "+team);
+  setTeam(team):void{
     this.team = team;
-    this.heroesService.teams.set(this.heroe.id, this.team);
+    this.heroesService.save(this.heroe.id, this.team).subscribe({
+      next:(resp)=>{
+        this.getOne();
+      }
+    });
   }
 
   launchModal():void{

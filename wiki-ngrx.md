@@ -122,8 +122,148 @@ Tras esto podemos añadir la extensión del navegador desde este enlace:
 
 - [Ejemplo de redux](https://digital55.com/blog/estructura-basica-store-ngrx/)
 
+## ¿Qué es NGXS?
+
+NGXS es una librería de manejo de estado y patrón para Angular escrita por Austin McDaniel (@amcdnl). Actúa como una fuente de verdad única para el estado de nuestra aplicación, utilizando una convención mínima con características de TypeScript como clases y decoradores.
+
+### La librería que se usa en angular para poder gestionar la store es ngxs:
+
+```
+npm install @ngxs/store --save
+```
+
+## Elementos importantes de NGXS
+
+### Store:
+Es el contenedor global del estado, despacha las acciones y el selector.
+Es decir proporciona la forma de seleccionar segmentos de datos del estado global.
+
+### Acción:
+Las acciones pueden considerarse como un comando que desencadena algo, o como el evento resultante de algo que ya sucedió.
+Cada acción contiene un campo de tipo, que es su identificador único y payload requerido para esa acción.
+
+- Ejemplo
+
+```
+import { Posts } from './posts.model';
+
+export class AddPost {
+  static readonly type = '[POSTS] Add';
+  constructor( public payload: Posts ) {}
+}
+
+export class RemovePost {
+  static readonly type = '[POSTS] Remove';
+  constructor( public payload: string ) {}
+}
+```
+
+### Estado:
+Los cambios de estado son manejados por funciones puras también llamadas reducers que toman el estado actual y la última acción para calcular un nuevo estado.
+
+```
+import { State, Action, StateContext, Selector } from '@ngxs/store';
+import { PostsStateModel } from './posts.model';
+import { AddPost, RemovePost } from './posts.actions';
+
+@State({
+  name: 'posts',
+  defaults: {
+    posts: []
+  }
+})
+export class PostsState {
+  @Selector()
+  static getPosts(state: PostsStateModel) { return state.posts; }
+
+  // Añade un nuevo post al estado
+  @Action(AddPost)
+  add({ getState, patchState }: StateContext<PostsStateModel>, { payload }: AddPost) {
+    const state = getState();
+    patchState({
+      posts: [...state.posts, payload]
+    });
+  }
+```
+
+  // Elimina un post del estado
+  @Action(RemovePost)
+  remove({ getState, patchState }: StateContext<PostsStateModel>, { payload }: RemovePost) {
+    patchState({
+      posts: getState().posts.filter(post => post.id !== payload)
+    });
+  }
+}
+
+### Selector:
+Los selectores son funciones puras utilizadas para seleccionar, derivar y componer piezas (trozos) de estado.
+
+## Herramientas de NGXS
+
+Para hacer uso de ella en primer lugar tenemos que instalar las librería:
+
+```
+npm install -D @ngxs/logger-plugin 
+npm install -D @ngxs/devtools-plugin
+```
+## ¿Qué acabamos de instalar?
 
 
+- @ngxs/logger-plugin: Es una dependencia de desarrollo. Con esto podremos inspeccionar rápidamente en la consola como el estado va mutando a lo largo del tiempo.
+- @ngxs/devtools-plugin: Es una dependencia de desarrollo. Nos permite utilizar la extensión Redux DevTools Extension con nuestra aplicación.
 
+### Ejemplo para añadirlo en nuestro proyecto
 
+```
+import { NgxsModule } from '@ngxs/store';
+import { NgxsReduxDevtoolsPluginModule } from '@ngxs/devtools-plugin';
+import { NgxsLoggerPluginModule } from '@ngxs/logger-plugin';
+import { environment } from 'src/environments/environment';
 
+@NgModule({
+  imports: [
+    BrowserModule,
+    FormsModule,
+    NgxsModule.forRoot([],
+      { developmentMode: !environment.production }
+    ),
+    NgxsReduxDevtoolsPluginModule.forRoot({
+      disabled: environment.production
+    }),
+    NgxsLoggerPluginModule.forRoot({
+      disabled: environment.production
+    })
+  ],
+})
+```
+
+### Diferencias NGRX y NGXS
+
+NGRX:
+
+- Libreria popular, 
+- curva de aprendizaje alta
+- Esta basado en redux
+- Tiene una gran cantidad de componentes
+
+NGXS:
+
+- Simplifica el estado o la gestión de datos.
+- Utiliza decoradores, clases, Di.
+- Tiene pocos componentes
+- Fue desarrollador por un grupo de desarrolladores de angular, 
+
+#### Elementos de NGRX
+
+- Reducers
+- Actions
+- Selectors
+- Effects
+- Redux Devtools
+
+#### Elementos de NGXS
+
+- Actions
+- Selectors
+- Effects
+- Redux Devtools

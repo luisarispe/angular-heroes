@@ -5,11 +5,12 @@ import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { HttpClientModule } from '@angular/common/http';
 import { HeroesService } from './heroes.service';
-import { StoreModule } from '@ngrx/store';
-import {  heroReducer } from './store/heroes.reducer';
-import { StoreDevtoolsModule } from '@ngrx/store-devtools';
-import { environment } from 'src/environments/environment';
 
+import { NgxsModule } from '@ngxs/store';
+import { NgxsReduxDevtoolsPluginModule } from '@ngxs/devtools-plugin';
+import { NgxsLoggerPluginModule } from '@ngxs/logger-plugin';
+import { environment } from 'src/environments/environment';
+import { HeroesState } from './store/heroes/heroes.state';
 
 
 @NgModule({
@@ -20,11 +21,18 @@ import { environment } from 'src/environments/environment';
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
-    StoreModule.forRoot({heroes: heroReducer}),
-    StoreDevtoolsModule.instrument({
-      maxAge: 25,
-      logOnly: environment.production,
+    NgxsModule.forRoot([],
+      { developmentMode: !environment.production }
+    ),
+    NgxsReduxDevtoolsPluginModule.forRoot({
+      disabled: environment.production
     }),
+    NgxsLoggerPluginModule.forRoot({
+      disabled: environment.production
+    }),
+    NgxsModule.forRoot([
+      HeroesState
+    ]),
   ],
   providers: [HeroesService],
   bootstrap: [AppComponent]
