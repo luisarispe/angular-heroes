@@ -10,16 +10,18 @@ import { HeroesService } from '../heroes.service';
   templateUrl: './hero-profile.component.html',
   styleUrls: ['./hero-profile.component.css']
 })
-export class HeroProfileComponent implements OnInit {
+export class HeroProfileComponent implements OnInit{
   @ViewChild('modal') modal;
   private id;
   public heroe: Heroe;
   public question_modal: string;
   public team:string = "";
-
+  public variable:number=0;
   constructor(private route: ActivatedRoute, private heroesService: HeroesService, private _location: Location) { }
-
+ 
   ngOnInit() {
+    
+
     this.route.params.subscribe(params => {
       this.id = params.id;
       this.getOne();
