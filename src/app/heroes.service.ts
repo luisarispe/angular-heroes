@@ -33,10 +33,10 @@ export class HeroesService {
     const url=this.base_url+'?offset='+(this.page * this.step)+ (nameStartsWith ? ('&nameStartsWith=' + nameStartsWith) : '');
 
     this.http.get<any>(url).subscribe((data) => {
+      
       this.total = Math.ceil(data.total / this.step);
       this.store.dispatch(new RemoveHeroes());
       data.heroes.forEach( result => {
-      
           this.store.dispatch(new AddHeroe({
             id:result.id,
             name:result.name,

@@ -12,9 +12,6 @@ import { Injectable } from '@angular/core';
 @Injectable()
 export class HeroesState {
 
-  @Selector()
-  static getPosts(state: HeroesStateModel) { return state.heroes; }
-
   // Añade un nuevo post al estado
   @Action(AddHeroe)
   add({ getState, patchState }: StateContext<HeroesStateModel>, { payload }: AddHeroe) {
